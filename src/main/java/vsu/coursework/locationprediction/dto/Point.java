@@ -1,4 +1,4 @@
-package vsu.coursework.locationprediction.entity;
+package vsu.coursework.locationprediction.dto;
 
 public class Point {
 

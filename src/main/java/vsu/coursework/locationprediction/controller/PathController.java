@@ -2,7 +2,7 @@ package vsu.coursework.locationprediction.controller;
 
 import org.springframework.web.bind.annotation.*;
 import vsu.coursework.locationprediction.dto.PathDto;
-import vsu.coursework.locationprediction.entity.Point;
+import vsu.coursework.locationprediction.dto.Point;
 import vsu.coursework.locationprediction.service.PathService;
 import vsu.coursework.locationprediction.suffixTree.Node;
 import vsu.coursework.locationprediction.suffixTree.SuffixTree;

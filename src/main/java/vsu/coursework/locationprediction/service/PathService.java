@@ -6,7 +6,7 @@ import org.locationtech.jts.geom.LineString;
 import vsu.coursework.locationprediction.suffixTree.*;
 import vsu.coursework.locationprediction.dto.PathDto;
 import vsu.coursework.locationprediction.entity.Path;
-import vsu.coursework.locationprediction.entity.Point;
+import vsu.coursework.locationprediction.dto.Point;
 import vsu.coursework.locationprediction.mapper.PathMapper;
 import org.springframework.stereotype.Service;
 import vsu.coursework.locationprediction.repository.PathRepository;
@@ -73,11 +73,7 @@ public class PathService {
     }
     public List<Node> searchNextPaths(Integer personID, List<Point> pathPrev) throws IOException {
         SuffixTree suffixTree = makeSearchTree(personID);
-        List<Node> res = suffixTree.search(pathPrev);
-        for (Node suf : res) {
-            System.out.println(suf.toString(0));
-        }
-        return res;
+        return suffixTree.search(pathPrev);
     }
 
     private List<Point> toListPoint(Coordinate[] coordinates) {

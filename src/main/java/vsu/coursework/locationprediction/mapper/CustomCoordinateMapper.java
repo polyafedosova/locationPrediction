@@ -4,7 +4,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.stereotype.Component;
 import vsu.coursework.locationprediction.dto.CoordinateDto;
 import vsu.coursework.locationprediction.entity.Coordinate;
-import vsu.coursework.locationprediction.entity.Point;
+import vsu.coursework.locationprediction.dto.Point;
 
 @Component
 public class CustomCoordinateMapper implements CoordinateMapper {

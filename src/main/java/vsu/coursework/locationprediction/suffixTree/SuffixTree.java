@@ -1,15 +1,12 @@
 package vsu.coursework.locationprediction.suffixTree;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import vsu.coursework.locationprediction.entity.Point;
+import vsu.coursework.locationprediction.dto.Point;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
 public class SuffixTree {
-    @JsonProperty("root")
     private Node root;
 
     public SuffixTree(List<List<Point>> coordinates) {
@@ -34,38 +31,76 @@ public class SuffixTree {
     }
 
     public List<Node> search(List<Point> query) {
-        List<Node> nodes = Collections.singletonList(root);
-
-        for (Point coordinate : query) {
+        Node nodeR = root.clone();
+        List<Node> nodes = Collections.singletonList(nodeR);
+        if (query.isEmpty()) {
             List<Node> newNodes = new ArrayList<>();
-
             double maxProbability = 0.0;
-
             for (Node node : nodes) {
-                for (Node child : node.getChildren()) {
-                    if (child.getCoordinate().equals(coordinate)) {
-                        for (Node childChild : child.getChildren()) {
-                            double probability = childChild.getProbability();
-                            if (probability > maxProbability) {
-                                newNodes.clear();
-                                newNodes.add(childChild);
-                                maxProbability = probability;
-                            } else if (probability == maxProbability) {
-                                newNodes.add(childChild);
-                            }
+                maxProbability = getMaxProbability(newNodes, maxProbability, node);
+            }
+            nodes = newNodes;
+        } else {
+            for (Point coordinate : query) {
+                List<Node> newNodes = new ArrayList<>();
+
+                double maxProbability = 0.0;
+
+                for (Node node : nodes) {
+                    for (Node child : node.getChildren()) {
+                        if (child.getCoordinate().equals(coordinate)) {
+                            maxProbability = getMaxProbability(newNodes, maxProbability, child);
                         }
                     }
                 }
-            }
 
-            nodes = newNodes;
+                nodes = newNodes;
 
-            if (nodes.isEmpty()) {
-                break;
+                if (nodes.isEmpty()) {
+                    break;
+                }
             }
         }
-
+        for (Node node : nodes) {
+            removeLowProbPath(node);
+        }
         return nodes;
+    }
+
+    private static void removeLowProbPath(Node node) {
+        double maxProbability = 0.0;
+        List<Node> nodesToRemove = new ArrayList<>();
+        for (Node child : node.getChildren()) {
+            double childProbability = child.getProbability();
+            if (maxProbability < childProbability) {
+                maxProbability = childProbability;
+            }
+        }
+        for (Node child : node.getChildren()) {
+            if (maxProbability > child.getProbability()) {
+                nodesToRemove.add(child);
+            }
+        }
+        for (Node child : nodesToRemove) {
+            node.remove(child);
+        }
+        for (Node child : node.getChildren()) {
+            removeLowProbPath(child);
+        }
+    }
+
+    private double getMaxProbability(List<Node> newNodes, double maxProbability, Node node) {
+        for (Node child : node.getChildren()) {
+            double probability = child.getProbability();
+            if (probability > maxProbability) {
+                newNodes.clear();
+                newNodes.add(child);
+                maxProbability = probability;
+            } else if (probability == maxProbability) {
+                newNodes.add(child);
+            }
+        }
+        return maxProbability;
     }
 
     public String printTree() {
@@ -91,22 +126,14 @@ public class SuffixTree {
                 int childId = id++;
                 nodeIds.put(child, childId);
 
-                writer.printf("  %d -> %d[label=\"%.2f\"];\n", nodeId, childId, child.getProbability());
+                writer.printf("  %d -> %d[label=\"%d\"];\n", nodeId, childId, (int) child.getProbability());
+//                writer.printf("  %d -> %d;\n", nodeId, childId);
 
                 stack.push(child);
             }
         }
 
         writer.println("}");
-    }
-
-
-    public Node getRoot() {
-        return root;
-    }
-
-    public void setRoot(Node root) {
-        this.root = root;
     }
 
     public static void viz(SuffixTree suffixTree) throws IOException {
@@ -122,5 +149,13 @@ public class SuffixTree {
         } catch (IOException | InterruptedException e) {
             System.err.println("Error running dot command: " + e.getMessage());
         }
+    }
+
+    public Node getRoot() {
+        return root;
+    }
+
+    public void setRoot(Node root) {
+        this.root = root;
     }
 }
